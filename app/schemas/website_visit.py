@@ -17,3 +17,19 @@ class WebsiteVisitCreate(BaseModel):
         if "?" in value or "#" in value:
             raise ValueError("page_path must not contain query or fragment")
         return value
+    
+
+class WebsiteVisitPeriodStats(BaseModel):
+    yearly: int
+    monthly: list[int]
+    daily: list[int]
+
+
+class WebsiteVisitStatsResponse(BaseModel):
+    site_key: str
+    year: int
+    month: int
+    pages: dict[str, WebsiteVisitPeriodStats]
+    
+    
+    
