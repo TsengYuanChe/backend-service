@@ -18,6 +18,17 @@ def create_website_visit(
     request: Request,
 ):
     ip_address = request.client.host if request.client else None
+    
+    # Temporary debug logs
+    print(
+        {
+            "client_host": ip_address,
+            "x_forwarded_for": request.headers.get("x-forwarded-for"),
+            "forwarded": request.headers.get("forwarded"),
+            "x_real_ip": request.headers.get("x-real-ip"),
+        },
+        flush=True,
+    )
 
     visit = WebsiteVisit(
         site_key=payload.site_key,
