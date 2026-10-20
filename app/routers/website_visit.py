@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request, status
 from sqlalchemy.exc import SQLAlchemyError
+from ipaddress import ip_address as parse_ip_address
 
 from app.database import SessionLocal
 from app.models.website_visit import WebsiteVisit
@@ -17,18 +18,7 @@ def create_website_visit(
     payload: WebsiteVisitCreate,
     request: Request,
 ):
-    ip_address = request.client.host if request.client else None
-    
-    # Temporary debug logs
-    print(
-        {
-            "client_host": ip_address,
-            "x_forwarded_for": request.headers.get("x-forwarded-for"),
-            "forwarded": request.headers.get("forwarded"),
-            "x_real_ip": request.headers.get("x-real-ip"),
-        },
-        flush=True,
-    )
+    ip_address = get_client_ip(request)
 
     visit = WebsiteVisit(
         site_key=payload.site_key,
@@ -55,3 +45,20 @@ def create_website_visit(
             status_code=500,
             detail="Failed to record website visit",
         )
+        
+        
+def get_client_ip(request: Request) -> str | None:
+    forwarded_for = request.headers.get("x-forwarded-for")
+
+    if forwarded_for:
+        ips = [ip.strip() for ip in forwarded_for.split(",")]
+
+        if len(ips) == 1:
+            try:
+                return str(parse_ip_address(ips[0]))
+            except ValueError:
+                pass
+
+    return request.client.host if request.client else None
+
+
