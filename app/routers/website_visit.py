@@ -1,6 +1,7 @@
 import calendar
 from datetime import datetime, timezone
 from ipaddress import ip_address as parse_ip_address
+from typing import Literal
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, HTTPException, Query, Request, status
@@ -83,7 +84,7 @@ def empty_stats(days_in_month: int) -> dict:
     status_code=status.HTTP_200_OK,
 )
 def get_website_visit_stats(
-    site_key: str = Query(..., min_length=1, max_length=100),
+    site_key: Literal["adamtseng", "andessence"] = Query(...),
 ):
     now = datetime.now(TAIPEI_TZ)
     year = now.year
@@ -92,7 +93,6 @@ def get_website_visit_stats(
 
     year_start = datetime(year, 1, 1, tzinfo=TAIPEI_TZ)
     year_end = datetime(year + 1, 1, 1, tzinfo=TAIPEI_TZ)
-    month_start = datetime(year, month, 1, tzinfo=TAIPEI_TZ)
 
     # 統一以 UTC 時間範圍查詢
     year_start_utc = year_start.astimezone(timezone.utc)
